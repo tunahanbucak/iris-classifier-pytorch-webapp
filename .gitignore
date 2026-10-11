@@ -1,0 +1,24 @@
+# Sanal Ortam (Virtual Environment) - Asla GitHub'a atılmamalı!
+.venv/
+venv/
+ENV/
+env/
+
+# Python derleme ve bytecode dosyaları
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE ve Editör ayarları
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# İşletim sistemi kalıntıları
+.DS_Store
+Thumbs.db
+
+# Geçici dosyalar ve test logları
+*.log
+.pytest_cache/

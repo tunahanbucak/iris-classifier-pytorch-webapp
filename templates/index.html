@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iris AI Classifier | PyTorch & Botanical Vision</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css?v=final">
+</head>
+<body>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <main class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="badge-pill">
+                <span class="pulse-dot"></span>
+                <span>PyTorch 2.x • Deep Neural Network</span>
+            </div>
+            <h1>Iris Çiçek Türü Sınıflandırıcı</h1>
+            <p class="subtitle">Eğitilmiş derin yapay sinir ağı modeli ile yaprak ölçümlerini analiz edin; yüksek çözünürlüklü botanik fotoğraflarla türü anında keşfedin.</p>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Left: Inputs & Sliders -->
+            <section class="card glass-card input-card">
+                <div class="card-header">
+                    <div>
+                        <h2>Fiziksel Yaprak Ölçümleri</h2>
+                        <span class="card-caption">Santimetre (cm) cinsinden değerleri canlı olarak kaydırın</span>
+                    </div>
+                </div>
+
+                <!-- Presets -->
+                <div class="presets-container">
+                    <span class="presets-label">Hızlı Test:</span>
+                    <div class="preset-buttons">
+                        <button type="button" class="btn-preset" data-sl="5.1" data-sw="3.5" data-pl="1.4" data-pw="0.2">
+                            🌸 Setosa Örneği
+                        </button>
+                        <button type="button" class="btn-preset" data-sl="5.9" data-sw="3.0" data-pl="4.2" data-pw="1.5">
+                            🌺 Versicolor Örneği
+                        </button>
+                        <button type="button" class="btn-preset" data-sl="6.5" data-sw="3.0" data-pl="5.5" data-pw="1.8">
+                            🪻 Virginica Örneği
+                        </button>
+                    </div>
+                </div>
+
+                <form id="prediction-form" class="sliders-form">
+                    <!-- Slider 1 -->
+                    <div class="control-group">
+                        <div class="control-label">
+                            <label for="sepal_length">Çanak Yaprak Uzunluğu (Sepal Length)</label>
+                            <span class="val-badge" id="val_sepal_length">5.1 cm</span>
+                        </div>
+                        <input type="range" id="sepal_length" min="4.0" max="8.0" step="0.1" value="5.1">
+                        <div class="range-bounds"><span>4.0 cm (Min)</span><span>8.0 cm (Max)</span></div>
+                    </div>
+
+                    <!-- Slider 2 -->
+                    <div class="control-group">
+                        <div class="control-label">
+                            <label for="sepal_width">Çanak Yaprak Genişliği (Sepal Width)</label>
+                            <span class="val-badge" id="val_sepal_width">3.5 cm</span>
+                        </div>
+                        <input type="range" id="sepal_width" min="2.0" max="4.5" step="0.1" value="3.5">
+                        <div class="range-bounds"><span>2.0 cm (Min)</span><span>4.5 cm (Max)</span></div>
+                    </div>
+
+                    <!-- Slider 3 -->
+                    <div class="control-group">
+                        <div class="control-label">
+                            <label for="petal_length">Taç Yaprak Uzunluğu (Petal Length)</label>
+                            <span class="val-badge" id="val_petal_length">1.4 cm</span>
+                        </div>
+                        <input type="range" id="petal_length" min="1.0" max="7.0" step="0.1" value="1.4">
+                        <div class="range-bounds"><span>1.0 cm (Min)</span><span>7.0 cm (Max)</span></div>
+                    </div>
+
+                    <!-- Slider 4 -->
+                    <div class="control-group">
+                        <div class="control-label">
+                            <label for="petal_width">Taç Yaprak Genişliği (Petal Width)</label>
+                            <span class="val-badge" id="val_petal_width">0.2 cm</span>
+                        </div>
+                        <input type="range" id="petal_width" min="0.1" max="2.5" step="0.1" value="0.2">
+                        <div class="range-bounds"><span>0.1 cm (Min)</span><span>2.5 cm (Max)</span></div>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="btn-primary">
+                        <span class="btn-text">Yapay Zeka ile Tahmin Et</span>
+                        <span class="btn-icon">⚡</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Right: Prediction Result Display with Botanical Photography -->
+            <section class="card glass-card result-card">
+                <div class="card-header">
+                    <div>
+                        <h2>Model Tahmini & Botanik Portre</h2>
+                        <span class="card-caption" id="model-status">Canlı PyTorch Çıktısı</span>
+                    </div>
+                    <span class="status-indicator">● Canlı</span>
+                </div>
+
+                <div class="result-content" id="result-wrapper">
+                    <!-- Botanical Image Hero Box -->
+                    <div class="botanical-photo-card" id="photo-frame">
+                        <img id="flower-img" src="/static/images/iris_setosa.jpg?v=final" alt="Tahmin Edilen Çiçek" class="flower-photo">
+                        <div class="photo-overlay-gradient"></div>
+                        
+                        <div class="photo-floating-badge" id="species-tag-badge">
+                            <span class="badge-dot"></span>
+                            <span id="badge-species-text">Iris-setosa</span>
+                        </div>
+
+                        <div class="photo-caption-info">
+                            <h3 class="photo-flower-name" id="res-tr-name">Setosa Süseni</h3>
+                            <span class="photo-latin-name" id="res-badge">Iris-setosa</span>
+                        </div>
+                    </div>
+
+                    <!-- Confidence Meter -->
+                    <div class="confidence-box">
+                        <div class="conf-header">
+                            <span>Tahmin Güven Oranı (Confidence)</span>
+                            <strong class="conf-percent" id="res-conf">%99.98</strong>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" id="res-conf-bar" style="width: 99.98%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <p class="flower-desc" id="res-desc">
+                        Küçük taç yaprakları (petals) ve narin mor çizgili çanak yaprakları (sepals) ile tanınır. Veri setinde doğrusal olarak diğerlerinden en kolay ayrılan türdür.
+                    </p>
+
+                    <!-- All Probabilities Breakdown -->
+                    <div class="breakdown-section">
+                        <h4>Softmax Olasılık Dağılımı (% İhtimal)</h4>
+                        <div class="prob-row">
+                            <div class="prob-info"><span>🌸 Iris Setosa</span><strong id="p-setosa">99.98%</strong></div>
+                            <div class="mini-bar"><div class="mini-fill fill-setosa" id="b-setosa" style="width: 99.98%;"></div></div>
+                        </div>
+                        <div class="prob-row">
+                            <div class="prob-info"><span>🌺 Iris Versicolor</span><strong id="p-versicolor">0.02%</strong></div>
+                            <div class="mini-bar"><div class="mini-fill fill-versicolor" id="b-versicolor" style="width: 0.02%;"></div></div>
+                        </div>
+                        <div class="prob-row">
+                            <div class="prob-info"><span>🪻 Iris Virginica</span><strong id="p-virginica">0.00%</strong></div>
+                            <div class="mini-bar"><div class="mini-fill fill-virginica" id="b-virginica" style="width: 0.00%;"></div></div>
+                        </div>
+                    </div>
+
+                    <!-- 🧠 Derin Öğrenme İç Mekanizması (Matematik & Teori Paneli) -->
+                    <div class="dl-inspector-box">
+                        <div class="inspector-header">
+                            <div class="inspector-title-wrap">
+                                <span class="inspector-icon">🧠</span>
+                                <div>
+                                    <span class="inspector-title">Model İç Mekanizması</span>
+                                    <span class="inspector-subtitle">Ham Lojitler ➔ Softmax ➔ Karar</span>
+                                </div>
+                            </div>
+                            <span class="inspector-pill">PyTorch Canlı</span>
+                        </div>
+                        <div class="inspector-grid">
+                            <!-- Sütun 1: Ham Lojitler -->
+                            <div class="inspector-col">
+                                <span class="col-lbl">1. Ham Lojitler (Model Çıktısı):</span>
+                                <div class="logit-items">
+                                    <div class="logit-item"><span class="badge-dot-sm dot-setosa"></span><span>Setosa:</span> <strong id="logit-setosa">+14.78</strong></div>
+                                    <div class="logit-item"><span class="badge-dot-sm dot-versicolor"></span><span>Versicolor:</span> <strong id="logit-versicolor">+5.78</strong></div>
+                                    <div class="logit-item"><span class="badge-dot-sm dot-virginica"></span><span>Virginica:</span> <strong id="logit-virginica">-18.87</strong></div>
+                                </div>
+                            </div>
+                            <!-- Sütun 2: Geçiş Oku -->
+                            <div class="inspector-col arrow-col">
+                                <span>➔</span>
+                            </div>
+                            <!-- Sütun 3: Softmax ve Argmax Kararı -->
+                            <div class="inspector-col">
+                                <span class="col-lbl">2. Softmax Formülü:</span>
+                                <div class="formula-box"><code>σ(z)ᵢ = e^(zᵢ) / Σ e^(zⱼ)</code></div>
+                                <span class="col-lbl" style="margin-top: 6px;">3. Argmax Kararı:</span>
+                                <div class="argmax-badge" id="res-argmax-idx">Sınıf 0 (Setosa)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Note -->
+                <div class="card-footer">
+                    <span>Mimarisi: 4 Giriş ➔ Linear(16) + ReLU ➔ Linear(16) + ReLU ➔ Linear(3) Lojit</span>
+                </div>
+            </section>
+        </div>
+
+        <!-- Botanical Species Gallery Section -->
+        <section class="gallery-section">
+            <div class="gallery-header">
+                <h2>Süsen Çiçeği Türleri & Karşılaştırma Galerisi</h2>
+                <p>Kartlara tıklayarak ilgili türün standart ölçülerini otomatik yükleyebilir ve yapay zekanın davranışını test edebilirsiniz.</p>
+            </div>
+
+            <div class="species-grid">
+                <!-- Card 1: Setosa -->
+                <div class="species-card active-card" id="card-setosa" data-sl="5.1" data-sw="3.5" data-pl="1.4" data-pw="0.2">
+                    <div class="species-card-img-wrap">
+                        <img src="/static/images/iris_setosa.jpg?v=botanical_v2" alt="Iris Setosa" loading="lazy">
+                        <span class="species-tag tag-setosa">Setosa</span>
+                    </div>
+                    <div class="species-card-body">
+                        <h4>Setosa Süseni</h4>
+                        <span class="latin-sub">Iris setosa</span>
+                        <div class="spec-traits">
+                            <div class="trait"><span>Taç Yaprak:</span> <strong>1.0 - 1.9 cm (Çok Küçük)</strong></div>
+                            <div class="trait"><span>Çanak Yaprak:</span> <strong>4.8 - 5.5 cm</strong></div>
+                        </div>
+                        <p class="species-card-desc">Taç yaprakları neredeyse körelmiş minyatür dik yapraklardır. Model bu özelliği sayesinde %100'e yakın doğrulukla hemen tanır.</p>
+                        <button type="button" class="btn-card-test">Bu Türü Yükle ➔</button>
+                    </div>
+                </div>
+
+                <!-- Card 2: Versicolor -->
+                <div class="species-card" id="card-versicolor" data-sl="5.9" data-sw="3.0" data-pl="4.2" data-pw="1.5">
+                    <div class="species-card-img-wrap">
+                        <img src="/static/images/iris_versicolor.jpg?v=botanical_v2" alt="Iris Versicolor" loading="lazy">
+                        <span class="species-tag tag-versicolor">Versicolor</span>
+                    </div>
+                    <div class="species-card-body">
+                        <h4>Versicolor Süseni</h4>
+                        <span class="latin-sub">Iris versicolor</span>
+                        <div class="spec-traits">
+                            <div class="trait"><span>Taç Yaprak:</span> <strong>3.5 - 5.0 cm (Orta Boy)</strong></div>
+                            <div class="trait"><span>Çanak Yaprak:</span> <strong>5.5 - 6.5 cm</strong></div>
+                        </div>
+                        <p class="species-card-desc">Dengeli orta boy yapraklara ve parlak kobalt mavisine sahiptir. Virginica türüyle sınır bölgelerinde örtüşen özellikler gösterebilir.</p>
+                        <button type="button" class="btn-card-test">Bu Türü Yükle ➔</button>
+                    </div>
+                </div>
+
+                <!-- Card 3: Virginica -->
+                <div class="species-card" id="card-virginica" data-sl="6.5" data-sw="3.0" data-pl="5.5" data-pw="1.8">
+                    <div class="species-card-img-wrap">
+                        <img src="/static/images/iris_virginica.jpg?v=botanical_v2" alt="Iris Virginica" loading="lazy">
+                        <span class="species-tag tag-virginica">Virginica</span>
+                    </div>
+                    <div class="species-card-body">
+                        <h4>Virginica Süseni</h4>
+                        <span class="latin-sub">Iris virginica</span>
+                        <div class="spec-traits">
+                            <div class="trait"><span>Taç Yaprak:</span> <strong>5.0 - 6.9 cm (En İri)</strong></div>
+                            <div class="trait"><span>Çanak Yaprak:</span> <strong>6.0 - 7.9 cm</strong></div>
+                        </div>
+                        <p class="species-card-desc">Üç tür arasındaki en iri ve gösterişli süsendir. Koyu mor kadifemsi yapraklar ve merkezdeki altın sarısı sakal deseniyle belirgindir.</p>
+                        <button type="button" class="btn-card-test">Bu Türü Yükle ➔</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/script.js?v=botanical_v2"></script>
+</body>
+</html>
